@@ -28,11 +28,12 @@ namespace NUnit.Framework.Tests.Constraints
             Assert.That(act, Throws.Exception.TypeOf<AssertionException>());
         }
 
-        [Test]
-        public void SucceedsWhenValueIsPresentUsingContainValue()
+        [TestCase("Mundo")]
+        [TestCase(null)]
+        public void SucceedsWhenValueIsPresentUsingContainValue(string? expectedValue)
         {
-            var dictionary = new Dictionary<string, string> { { "Hello", "World" }, { "Hola", "Mundo" } };
-            Assert.That(dictionary, Does.ContainValue("Mundo"));
+            var dictionary = new Dictionary<string, string?> { { "Hello", "World" }, { "Hola", expectedValue } };
+            Assert.That(dictionary, Does.ContainValue(expectedValue));
         }
 
         [Test]
@@ -69,6 +70,14 @@ namespace NUnit.Framework.Tests.Constraints
             Assert.That(dictionary, new DictionaryContainsValueConstraint("UNIVERSE").IgnoreCase);
         }
 
+        [Test]
+        public void IgnoreWhiteSpaceIsHonored()
+        {
+            var dictionary = new Dictionary<string, string> { { "Hello", "World" }, { "Hi", "Universe" }, { "Hola", "Mundo" } };
+
+            Assert.That(dictionary, new DictionaryContainsValueConstraint("U n i v e r s e").IgnoreWhiteSpace);
+        }
+
         [Test, SetCulture("en-US")]
         public void UsingIsHonored()
         {
@@ -85,6 +94,14 @@ namespace NUnit.Framework.Tests.Constraints
             var value = new XY(5, 12);
             Assert.That(dictionary, Does.Not.ContainValue(value));
             Assert.That(dictionary, Does.ContainValue(value).UsingPropertiesComparer());
+        }
+
+        [Test]
+        public void UsingCustomComparerIsHonored()
+        {
+            var dictionary = new Dictionary<string, int> { { "a", 1 }, { "b", 2 }, { "c", 3 } };
+
+            Assert.That(dictionary, new DictionaryContainsValueConstraint("1").Using<int, string>((actual, expected) => actual.ToString() == expected));
         }
 
         private sealed class XY

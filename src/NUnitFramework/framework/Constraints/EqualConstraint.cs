@@ -66,12 +66,33 @@ namespace NUnit.Framework.Constraints
         public bool CaseInsensitive => _comparer.IgnoreCase;
 
         /// <summary>
+        /// Gets a value indicating whether to compare ignoring white space.
+        /// </summary>
+        /// <value>
+        ///   <see langword="true"/> if comparing ignoreing white space; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IgnoringWhiteSpace => _comparer.IgnoreWhiteSpace;
+
+        /// <summary>
+        /// Gets a value indicating whether to compare separate properties.
+        /// </summary>
+        /// <value>
+        ///   <see langword="true"/> if comparing separate properties; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool ComparingProperties => _comparer.CompareProperties;
+
+        /// <summary>
         /// Gets a value indicating whether or not to clip strings.
         /// </summary>
         /// <value>
         ///   <see langword="true"/> if set to clip strings otherwise, <see langword="false"/>.
         /// </value>
         public bool ClipStrings { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether there is any additional Failure Information.
+        /// </summary>
+        public bool HasFailurePoints => _comparer.HasFailurePoints;
 
         /// <summary>
         /// Gets the failure points.
@@ -92,6 +113,18 @@ namespace NUnit.Framework.Constraints
             get
             {
                 _comparer.IgnoreCase = true;
+                return this;
+            }
+        }
+
+        /// <summary>
+        /// Flag the constraint to ignore white space and return self.
+        /// </summary>
+        public EqualConstraint IgnoreWhiteSpace
+        {
+            get
+            {
+                _comparer.IgnoreWhiteSpace = true;
                 return this;
             }
         }
@@ -338,8 +371,10 @@ namespace NUnit.Framework.Constraints
         /// Flag the constraint to use the supplied predicate function
         /// </summary>
         /// <param name="comparison">The comparison function to use.</param>
+        /// <typeparam name="TActual">The type of the actual value. Note for collection comparisons this is the element type.</typeparam>
+        /// <typeparam name="TExpected">The type of the expected value. Note for collection comparisons this is the element type.</typeparam>
         /// <returns>Self.</returns>
-        public EqualConstraint Using<TCollectionType, TMemberType>(Func<TCollectionType, TMemberType, bool> comparison)
+        public EqualConstraint Using<TActual, TExpected>(Func<TActual, TExpected, bool> comparison)
         {
             _comparer.ExternalComparers.Add(EqualityAdapter.For(comparison));
             return this;
@@ -396,6 +431,9 @@ namespace NUnit.Framework.Constraints
 
                 if (_comparer.IgnoreCase)
                     sb.Append(", ignoring case");
+
+                if (_comparer.IgnoreWhiteSpace)
+                    sb.Append(", ignoring white-space");
 
                 return sb.ToString();
             }
